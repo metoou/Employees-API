@@ -47,7 +47,6 @@ namespace OTS.DataAccess.Repositories
             await _context.SaveChangesAsync();
 
         }
-
         public Task<IEnumerable<T>> GetByCondition(Func<T, bool> predicate)
         {
             var data = Data as List<T>;

@@ -19,9 +19,11 @@ namespace OTS.WebHost.Controllers
         : ControllerBase
     {
         private readonly IRepository<Employee> _employeeRepository;
-        public EmployeesController(IRepository<Employee> employeeRepository)
+        private readonly IRepository<Department> _departmentRepository;
+        public EmployeesController(IRepository<Employee> employeeRepository, IRepository<Department> departmentRepository)
         {
             _employeeRepository = employeeRepository;
+            _departmentRepository = departmentRepository;
         }
 
         /// <summary>
@@ -67,6 +69,33 @@ namespace OTS.WebHost.Controllers
             };
 
             return employeeModel;
+        }
+
+        /// <summary>
+        /// Получить данные сотрудников по Id отдела
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("department/{id:guid}")]
+        public async Task<List<EmployeeResponse>> GetEmployeesByDepartmentIdAsync(Guid id)
+        {
+            var department = await _departmentRepository.GetByIdAsync(id);
+
+            var employees = await GetEmployeesAsync();
+
+            // var employee = await _employeeRepository.GetByIdAsync(employees.SingleOrDefault(x => x.DepartmentId == id).Id);
+            var employeesModelList = employees.Where(o => o.DepartmentId == id)
+                .Select(x =>
+                new EmployeeResponse()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Salary = x.Salary,
+                    DepartmentId = x.DepartmentId
+                })
+                .ToList();
+
+
+            return employeesModelList;
         }
 
         /// <summary>
